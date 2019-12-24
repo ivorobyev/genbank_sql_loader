@@ -94,8 +94,11 @@ def put_genbank_data_to_db(database, taxon_id, offset = 100):
     while from_ < len(seq_list):
             s_time = time.time()
             seq_string = ','.join(seq_list[from_:to])
-            insert_row(seq_string, conn)
-            conn.commit()
+            try:
+                insert_row(seq_string, conn)
+                conn.commit()
+            except:
+                print('Error')
             print('{0} from {1} rows processed, time: {2}'.format(processed, len(seq_list), time.time() - s_time))
             from_ = to
             to += offset
