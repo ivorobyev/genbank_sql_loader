@@ -54,21 +54,16 @@ def extract_from_xml(a):
     return [primary_accession, created, updated, protein_seq, dna_seq, taxon, source, description, mol_type]
     
 def insert_row(id_, conn):
-    start_time = time.time()
     row = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id={0}&rettype=gb&retmode=xml'
     row = row.format(id_)
     resp = requests.get(row)
-    print('getting data {0}'.format(time.time() - start_time))
     tree = ET.ElementTree(ET.fromstring(resp.text))
     
-    start_time = time.time()
     pool = Pool(3)
     elements = pool.map(extract_from_xml, [a for a in tree.getroot()])
     pool.close()
     pool.join()
-    print('xml parsing {0}'.format(time.time() - start_time))
-      
-    start_time = time.time()
+
     for row in elements:
         if row is not None:
             sql = '''INSERT OR REPLACE INTO sequences(PA, created, updated, protein_seq, dna_seq, taxon, source, description, mol_type)
@@ -77,31 +72,37 @@ def insert_row(id_, conn):
 
             cur = conn.cursor()
             cur.execute(sql)
-    print('iserting {0}'.format(time.time() - start_time))
 
-if __name__ == "__main__":
-    conn = create_connection('genbank.db')
+def put_genbank_data_to_db(database, taxon_id, offset = 100):
+    start_time = time.time()
+
+    try:
+        conn = create_connection(database)
+    except:
+        print("Can't connect to this database")
+        exit(1)
 
     check_nums = 0
 
-    seq_list = get_sequence_ids_for_taxon(1063)
+    print('Getting sequences list for taxon {0}'.format(taxon_id))
+    seq_list = get_sequence_ids_for_taxon(taxon_id)
     print('seq_list got')
 
-    offset = 150
     from_ = 0
     to = offset
-
-    start_time = time.time()
-
+    processed = len(seq_list[from_:to])
     while from_ < len(seq_list):
-            print(to)
+            s_time = time.time()
             seq_string = ','.join(seq_list[from_:to])
             insert_row(seq_string, conn)
             conn.commit()
+            print(len(seq_list[from_:to]))
+            print('{0} from {1} rows processed, time: {2}'.format(processed, len(seq_list), time.time() - s_time))
             from_ = to
             to += offset
-            print('OK')
-
-    conn.commit()    
+            processed += len(seq_list[from_:to])
+              
     conn.close()
-    print('all time {0}'.format(time.time() - start_time))
+    print('Elapsed time: {0}'.format(time.time() - start_time))
+
+put_genbank_data_to_db('genbank.db', 1063, 150)
