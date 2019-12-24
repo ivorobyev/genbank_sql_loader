@@ -59,7 +59,7 @@ def insert_row(id_, conn):
     resp = requests.get(row)
     tree = ET.ElementTree(ET.fromstring(resp.text))
     
-    pool = Pool(3)
+    pool = Pool(10)
     elements = pool.map(extract_from_xml, [a for a in tree.getroot()])
     pool.close()
     pool.join()
