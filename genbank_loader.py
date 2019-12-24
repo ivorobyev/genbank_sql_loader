@@ -57,7 +57,7 @@ def insert_row(id_, conn):
     row = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id={0}&rettype=gb&retmode=xml'
     row = row.format(id_)
     resp = requests.get(row)
-    tree = ET.ElementTree(ET.fromstring(resp.еуче))
+    tree = ET.ElementTree(ET.fromstring(resp.text))
     
     pool = Pool(3)
     elements = pool.map(extract_from_xml, [a for a in tree.getroot()])
