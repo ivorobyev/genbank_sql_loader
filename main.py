@@ -3,7 +3,7 @@ import time
 
 start_time = time.time()
 print('Start getting data from Genbank by given taxons')
-with open('taxon_full_list.txt', 'r') as f:
+with open('taxons_full_list.txt', 'r') as f:
     taxons = []
     for line in f:
         taxons.append(int(line))
