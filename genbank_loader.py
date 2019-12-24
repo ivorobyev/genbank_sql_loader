@@ -57,7 +57,7 @@ def insert_row(id_, conn):
     row = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id={0}&rettype=gb&retmode=xml'
     row = row.format(id_)
     resp = requests.get(row)
-    tree = ET.ElementTree(ET.fromstring(resp.text))
+    tree = ET.ElementTree(ET.fromstring(resp.еуче))
     
     pool = Pool(3)
     elements = pool.map(extract_from_xml, [a for a in tree.getroot()])
@@ -96,7 +96,6 @@ def put_genbank_data_to_db(database, taxon_id, offset = 100):
             seq_string = ','.join(seq_list[from_:to])
             insert_row(seq_string, conn)
             conn.commit()
-            print(len(seq_list[from_:to]))
             print('{0} from {1} rows processed, time: {2}'.format(processed, len(seq_list), time.time() - s_time))
             from_ = to
             to += offset
@@ -104,5 +103,3 @@ def put_genbank_data_to_db(database, taxon_id, offset = 100):
               
     conn.close()
     print('Elapsed time: {0}'.format(time.time() - start_time))
-
-put_genbank_data_to_db('genbank.db', 1063, 150)
