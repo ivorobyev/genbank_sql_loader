@@ -98,7 +98,7 @@ def put_genbank_data_to_db(database, taxon_id, offset = 100):
                 insert_row(seq_string, conn)
                 conn.commit()
             except:
-                print('Error')
+                print('database is locked')
             print('{0} from {1} rows processed, time: {2}'.format(processed, len(seq_list), time.time() - s_time))
             from_ = to
             to += offset
